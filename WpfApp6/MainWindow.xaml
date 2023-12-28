@@ -22,14 +22,15 @@
             <StackPanel Orientation="Vertical" Width="900" Margin="100,0,0,0">
                 <Label Content="每小時提供各測站之空氣品質指標（AQI），原始資料版本公告於空氣品質監測網https://airtw.moenv.gov.tw" Height="40" 
                        VerticalContentAlignment="Center"/>
-                <TextBox x:Name="UrTexBox" Text="請在此處輸入URL網址" 
-                         Height="40" VerticalContentAlignment="Center"/>
+                <TextBox x:Name="UrlTexBox" Text="請在此處輸入URL網址" 
+                         Height="40" VerticalContentAlignment="Center" FontSize="14" TextWrapping="Wrap" />
             </StackPanel>
             <Button x:Name="FetchDataButton" Content="抓取網路資料" Height="50" Width="100" FontSize="14"
-                    FontWeight="Bold" Margin="50,0,0,0" />
+                    FontWeight="Bold" Margin="50,0,0,0" Click="FetchDataButton_Click"  />
         </StackPanel>
 
-        <TextBox x:Name="ContentTextBox" Grid.Row="1" Grid.Column="0"  Background="#FFEAE6D8"/>
+        <TextBox x:Name="ContentTextBox" Grid.Row="1" Grid.Column="0"  Background="#FFEAE6D8" TextWrapping="Wrap" 
+                 ScrollViewer.VerticalScrollBarVisibility="Auto" FontSize="14" /> <!--TextWrapping換行-->
 
         <GridSplitter Grid.Row="1" Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="LightGray"/>
         <Grid Grid.Row="1" Grid.Column="2">
@@ -41,9 +42,18 @@
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" Grid.Column="0" Margin="2,2,2,2" BorderBrush="Red"
+                    BorderThickness="1">
+                <DataGrid x:Name="RecordDataGrid" AutoGenerateColumns="True" />
+            </Border>
+
+            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Height="5" VerticalAlignment="Center" 
+                          Background="LightGray"/>
+
+            <Border Grid.Row="2" Grid.Column="0" Margin="2,2,2,2" BorderBrush="Red"
                     BorderThickness="1"/>
-            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                          Background="Red"/>
+            <WrapPanel x:Name="DataWrapPanel" Orientation="Horizontal" Margin="5, 5, 5, 5" />
+            <Border Grid.Row="3" Grid.Column="0" Margin="2,2,2,2" BorderBrush="Red"
+                    BorderThickness="1"/>
         </Grid>
 
         <StatusBar Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
