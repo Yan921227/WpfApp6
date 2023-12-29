@@ -21,7 +21,7 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal">
             <StackPanel Orientation="Vertical" Width="900" Margin="100,0,0,0">
                 <Label Content="每小時提供各測站之空氣品質指標（AQI），原始資料版本公告於空氣品質監測網https://airtw.moenv.gov.tw" Height="40" 
-                       VerticalContentAlignment="Center"/>
+                       VerticalContentAlignment="Center"/> 
                 <TextBox x:Name="UrlTexBox" Text="請在此處輸入URL網址" 
                          Height="40" VerticalContentAlignment="Center" FontSize="14" TextWrapping="Wrap" />
             </StackPanel>
