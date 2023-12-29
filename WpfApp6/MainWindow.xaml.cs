@@ -16,6 +16,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LiveCharts;
+using LiveCharts.Wpf;
 
 namespace WpfApp6
 {
@@ -29,6 +31,8 @@ namespace WpfApp6
         AQIdata aqidata =new AQIdata();
         List<Field> fields = new List<Field>();
         List<Record> records = new List<Record>();
+        List<Record> selectedRecords= new List<Record>();
+        SeriesCollection seriesCollection= new SeriesCollection();
         public MainWindow()
         {
             InitializeComponent();
@@ -44,6 +48,7 @@ namespace WpfApp6
             aqidata = JsonSerializer.Deserialize<AQIdata>(jsonData);
             fields = aqidata.fields.ToList(); 
             records= aqidata.records.ToList();
+            selectedRecords = records;//records 全部地區資料 selectRecords 選取後的
             StatusTextBlock.Text=$"共有{records.Count}筆資料";
             DisplayAQIdata();
         }
@@ -66,24 +71,59 @@ namespace WpfApp6
                         CheckBox cb = new CheckBox()
                         {
                             Content = field.info.label,
-                            Tag=field.id,
+                            Tag=field.id,//tag標籤
                             Margin= new Thickness(3),
                             FontSize=14,
                             FontWeight= FontWeights.Bold,
                             Width= 120
                         };
-                        cb.Checked += CheckBox_Checked;
+                        cb.Checked += UpdateChart;
+                        cb.Unchecked += UpdateChart;
                         DataWrapPanel.Children.Add(cb);
                     }
                 }
             }
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void Cb_Unchecked(object sender, RoutedEventArgs e)
         {
-            var cb = sender as CheckBox;
+            throw new NotImplementedException();
+        }
 
-            MessageBox.Show($"{cb.Tag}");
+        private void UpdateChart(object sender, RoutedEventArgs e)
+        {
+            seriesCollection.Clear();
+
+            foreach (CheckBox cb in DataWrapPanel.Children)
+            {
+                if (cb.IsChecked == true)
+                {
+                    List<String> labels = new List<String>();
+                    String tag = cb.Tag.ToString();
+                    ColumnSeries columnSeries = new ColumnSeries();
+                    ChartValues<double> values = new ChartValues<double>();
+                    foreach (Record record in selectedRecords)
+                    {
+                        var propertyInfo = record.GetType().GetProperty(tag);
+                        if (propertyInfo != null)
+                        {
+                            String? value = propertyInfo.GetValue(record) as String;
+                            if (Double.TryParse(value, out double v))
+                            {
+                                values.Add(v);
+                                labels.Add(record.sitename);
+                            }
+
+                        }
+
+                    }
+                    columnSeries.Values = values;
+                    columnSeries.Title = tag;
+                    columnSeries.LabelPoint = point => $"{labels[(int)point.X]}:{point.Y.ToString()}";//=> Lambda
+                    seriesCollection.Add(columnSeries);
+                }
+            }
+            AQIChart.Series= seriesCollection;
         }
 
         private async Task<string> FetchContentAsync(string url) //回傳字串
@@ -92,7 +132,7 @@ namespace WpfApp6
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    return await client.GetStringAsync(url);
+                    return await client.GetStringAsync(url);//async 非同步
                 }
             }
             catch (Exception ex)
@@ -100,6 +140,17 @@ namespace WpfApp6
                 MessageBox.Show($"{ex.Message}");
                 return $"{ex.Message}";
             }
+        }
+
+        private void RecordDataGrid_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            e.Row.Header = (e.Row.GetIndex() + 1).ToString();
+        }
+
+        private void RecordDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            selectedRecords = RecordDataGrid.SelectedItems.Cast<Record>().ToList();
+            StatusTextBlock.Text = $"共選取{selectedRecords.Count}筆記錄";
         }
     }
 }
